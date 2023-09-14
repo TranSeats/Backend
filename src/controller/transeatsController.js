@@ -1,0 +1,30 @@
+const transeatsService = require("../services/transeatsServices");
+
+async function register(req, res) {
+  try {
+    const result = await transeatsService.register(req.body);
+    res.json(result);
+  } catch (err) {
+    if(err.code == 23505){
+      const message = { message: "Email Already Registered",}
+      res.json(message)
+    }
+    else{
+      res.json(err.detail);
+    }
+    }
+}
+
+async function login(req, res) {
+  try {
+    const result = await transeatsService.login(req.body);
+    res.json(result);
+  } catch (err) {
+    res.json(err.detail);
+  }
+}
+
+module.exports = {
+  register,
+  login,
+};
