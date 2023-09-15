@@ -1,6 +1,10 @@
 const e = require("express");
 const db = require("../config/config");
 const uuid = require('uuid');
+const security = require("../utils/security")
+const middleware = require ("../middleware/auth")
+
+
 
 async function register(body) {
   const { name, email, password } = body;
@@ -10,7 +14,8 @@ async function register(body) {
     };
   }
   const id = uuid.v4()
-  const query = `INSERT INTO account (ID, NAME, EMAIL, PASSWORD) VALUES ('${id}','${name}', '${email}','${password}')`;
+  const hashedPassword = await security.hashPassword(password)
+  const query = `INSERT INTO account (ID, NAME, EMAIL, PASSWORD) VALUES ('${id}','${name}', '${email}','${hashedPassword}')`;
   const result = await db.query(query);
   if (result.rowCount !== 0) {
     return {
@@ -51,7 +56,14 @@ async function login(body) {
   }
 }
 
+async function testProtected(body) {
+  return {
+    message: "Protected route accessed successfully"
+  };
+}
+
 module.exports = {
   register,
   login,
+  testProtected
 };

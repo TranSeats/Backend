@@ -7,7 +7,7 @@ async function register(req, res) {
   } catch (err) {
     if(err.code == 23505){
       const message = { message: "Email Already Registered",}
-      res.json(message)
+      res.status(400).json(message)
     }
     else{
       res.json(err.detail);
@@ -18,6 +18,18 @@ async function register(req, res) {
 async function login(req, res) {
   try {
     const result = await transeatsService.login(req.body);
+    if (!result.idUser){
+      res.status(401).json(result)
+    }
+    res.json(result);
+  } catch (err) {
+    res.json(err.detail);
+  }
+}
+
+async function testProtected(req,res){
+  try {
+    const result = await transeatsService.testProtected(req.body);
     res.json(result);
   } catch (err) {
     res.json(err.detail);
@@ -27,4 +39,5 @@ async function login(req, res) {
 module.exports = {
   register,
   login,
+  testProtected
 };
