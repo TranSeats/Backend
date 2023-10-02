@@ -1,4 +1,5 @@
 const transeatsService = require("../services/transeatsServices");
+const transeatsBuild   = require("../services/transeatsBuild")
 
 async function register(req, res) {
   try {
@@ -36,8 +37,21 @@ async function testProtected(req,res){
   }
 }
 
+async function build(req,res){
+  try {
+    const result = await transeatsBuild.handleWebhook(req);
+    if (result.code == 401){
+      res.status(code).json(result)
+    }
+    res.json(result);
+  } catch (err) {
+    res.json(err.detail);
+  }
+}
+
 module.exports = {
   register,
   login,
-  testProtected
+  testProtected,
+  build
 };
