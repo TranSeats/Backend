@@ -1,6 +1,7 @@
 const crypto = require("crypto")
-const { exec } = require("child_process");
 const path = require ('path')
+const util = require("util");
+const exec = util.promisify(require("child_process").exec);
 require('dotenv').config({ path: path.resolve(__dirname, '../config/.env') });
 
 
@@ -11,24 +12,22 @@ async function handleWebhook(req){
             message: "Unauthorized"
         }
     }
-    build()
+    return build()
 }
 async function build() {
-    console.log(req)
-    exec("git pull origin master", (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-    });
-    return {
-        code : 200,
-        message: "Build Successful"
+    try {
+        const { stdout, stderr } = await exec("git pull origin master");
+        console.log(`output: ${stdout}`);
+        return {
+            code: 200,
+            message: "Build Successful"
+        };
+    } catch (error) {
+        console.error(`error: ${error.message}`);
+        return {
+            code: 400,
+            message: "Build Error"
+        };
     }
   }
 function verify_signature (req) {
@@ -38,7 +37,7 @@ function verify_signature (req) {
       .update(JSON.stringify(req.body))
       .digest("hex");
     let trusted = Buffer.from(`sha256=${signature}`, 'ascii');
-    let untrusted =  Buffer.from(req.headers.get("x-hub-signature-256"), 'ascii');
+    let untrusted =  Buffer.from(req.headers['x-hub-signature-256'], 'ascii');
     return crypto.timingSafeEqual(trusted, untrusted);
   };
 

@@ -41,9 +41,9 @@ async function build(req,res){
   try {
     const result = await transeatsBuild.handleWebhook(req);
     if (result.code == 401){
-      res.status(code).json(result)
+      res.status(result.code).json(result.message)
     }
-    res.json(result);
+    res.json(result.message);
   } catch (err) {
     res.json(err.detail);
   }
