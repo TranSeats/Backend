@@ -3,6 +3,7 @@ const db = require("../config/config");
 const uuid = require('uuid');
 const security = require("../utils/security")
 const middleware = require ("../middleware/auth")
+const mqtt = require("../utils/mqtt")
 
 
 
@@ -62,8 +63,25 @@ async function testProtected(body) {
   };
 }
 
+async function publish(body) {
+  const { topic, latitude, longitude } = body;
+  const title = "Gerbong " + 1
+  const crowd_level = 5
+  var message = {
+    "title": title,
+    "latitude": latitude,
+    "longitude": longitude,
+    "crowd_level": crowd_level
+  }
+  mqtt.publishMessage(topic, JSON.stringify(message))
+  return {
+    message: "Message successfully published"
+  };
+}
+
 module.exports = {
   register,
   login,
-  testProtected
+  testProtected,
+  publish
 };

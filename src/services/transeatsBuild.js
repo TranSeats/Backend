@@ -6,17 +6,24 @@ require('dotenv').config({ path: path.resolve(__dirname, '../config/.env') });
 
 
 async function handleWebhook(req){
+    if (!req.headers['x-hub-signature-256']) {
+        return {
+            code : 401,
+            message: "Unauthorized"
+        }
+    }
     if (!verify_signature(req)) {
         return {
             code : 401,
             message: "Unauthorized"
         }
     }
+    console.log("test2")
     return build()
 }
 async function build() {
     try {
-        const { stdout, stderr } = await exec("git pull origin master");
+        const { stdout, stderr } = await exec("git pull origin master && npm install && pm2 reload index");
         console.log(`output: ${stdout}`);
         return {
             code: 200,
