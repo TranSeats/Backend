@@ -51,7 +51,7 @@ async function build(req,res){
 
 async function publish(req,res){
   try {
-    const result = await transeatsService.publish(req.body);
+    const result = await transeatsService.publish(req);
     res.json(result);
   } catch (err) {
     res.json(err.detail);

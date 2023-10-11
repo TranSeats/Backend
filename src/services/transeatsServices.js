@@ -4,8 +4,7 @@ const uuid = require('uuid');
 const security = require("../utils/security")
 const middleware = require ("../middleware/auth")
 const mqtt = require("../utils/mqtt")
-
-
+const imageProcess = require("../utils/imageProcess")
 
 async function register(body) {
   const { name, email, password } = body;
@@ -63,20 +62,30 @@ async function testProtected(body) {
   };
 }
 
-async function publish(body) {
-  const { topic, latitude, longitude } = body;
-  const title = "Gerbong " + 1
-  const crowd_level = 5
-  var message = {
-    "title": title,
-    "latitude": latitude,
-    "longitude": longitude,
-    "crowd_level": crowd_level
+async function publish(req) {
+  const image = req.file;
+  try {
+    imageCount = await imageProcess.countImage(image)
+    const { topic, latitude, longitude } = req.body;
+    const {head, person} = imageCount
+    const title = "Gerbong " + 1
+    const crowd_level = 5
+    var message = {
+      "title": title,
+      "latitude": latitude,
+      "longitude": longitude,
+      "crowd_level": crowd_level,
+      "head": head,
+      "person": person
+    }
+    mqtt.publishMessage(topic, JSON.stringify(message))
+    return {
+      message: message
+    };
+  } catch (error) {
+    console.log(error);
   }
-  mqtt.publishMessage(topic, JSON.stringify(message))
-  return {
-    message: "Message successfully published"
-  };
+  
 }
 
 module.exports = {
