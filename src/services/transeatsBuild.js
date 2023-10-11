@@ -23,7 +23,7 @@ async function handleWebhook(req){
 }
 async function build() {
     try {
-        const { stdout, stderr } = await exec("git pull origin master && npm install && pm2 reload index");
+        const { stdout, stderr } = await exec("git pull origin master && npm install");
         console.log(`output: ${stdout}`);
         return {
             code: 200,
