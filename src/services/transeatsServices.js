@@ -63,9 +63,9 @@ async function testProtected(body) {
 }
 
 async function publish(req) {
-  const image = req.file;
+  const {image, imageName} = req.body;
   try {
-    imageCount = await imageProcess.countImage(image)
+    imageCount = await imageProcess.countImage(image, imageName)
     const { topic, latitude, longitude } = req.body;
     const {head, person} = imageCount
     const title = "Gerbong " + 1
