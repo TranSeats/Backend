@@ -33,6 +33,22 @@ async function login(body) {
   const { email, password } = body;
   const query = `SELECT * FROM account WHERE email = '${email}'`;
   const result = await db.query(query);
+  if (result.rowCount !== 0) {
+    return {
+      message: "User Created",
+    };
+  } 
+  else {
+    return {
+      message: "Error",
+    };
+  }
+}
+
+async function insertTrainData(body) {
+  const {latitude, longitude, person, crowd_level} = body
+  const query = `INSERT INTO TRAINDATA (trainId, carriageId, latitude, longitude, person, crowdLevel) VALUES (1, 1, ${latitude}, ${longitude}, ${person}, ${crowd_level})`;
+  const result = await db.query(query);
   if (result.rows.length === 0) {
     return {
       message: "User not found",
@@ -55,6 +71,7 @@ async function login(body) {
     }
   }
 }
+
 
 async function testProtected(body) {
   return {
@@ -79,6 +96,7 @@ async function publish(req) {
       "person": person
     }
     mqtt.publishMessage(topic, JSON.stringify(message))
+    insertTrainData(message)
     return {
       message: message
     };
