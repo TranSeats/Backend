@@ -7,7 +7,8 @@ const options = {
     username: process.env.mqttusername,
     password: process.env.mqttpassword
 }
-const client = mqtt.connect("mqtt://35.239.90.168:1883", options);
+const host = process.env.host
+const client = mqtt.connect(`mqtt://${host}:1883`, options);
 
 client.on("connect", () => {
   console.log("MQTT connected")
