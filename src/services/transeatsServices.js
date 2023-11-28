@@ -33,15 +33,26 @@ async function login(body) {
   const { email, password } = body;
   const query = `SELECT * FROM account WHERE email = '${email}'`;
   const result = await db.query(query);
-  if (result.rowCount !== 0) {
+  if (result.rows.length === 0) {
     return {
-      message: "User Created",
+      message: "User not found",
     };
   } 
   else {
-    return {
-      message: "Error",
-    };
+    const user = result.rows[0];
+    if (await security.comparePassword(password, user.password)){
+      const token = await middleware.generateToken(user.id)
+      return {
+        message: "Login successful",
+        idUser: user.id,
+        token: token,
+      };
+    }
+    else {
+      return {
+        message: "Login failed",
+      };
+    }
   }
 }
 
