@@ -79,31 +79,50 @@ async function testProtected(body) {
   };
 }
 
-async function publish(req) {
-  const {image, imageName} = req.body;
-  try {
-    imageCount = await imageProcess.countImage(image, imageName)
-    const { topic, latitude, longitude } = req.body;
-    const {head, person} = imageCount
-    const title = "Gerbong " + 1
-    const crowd_level = 5
-    var message = {
-      "title": title,
-      "latitude": latitude,
-      "longitude": longitude,
-      "crowd_level": crowd_level,
-      "head": head,
-      "person": person
-    }
-    mqtt.publishMessage(topic, JSON.stringify(message))
-    insertTrainData(message)
-    return {
-      message: message
-    };
-  } catch (error) {
-    console.log(error);
+let message={
+  "latitude": "",
+  "longitude": "",
+  "prediction" : [
+    
+  ]
+}
+
+async function publish(body) {
+  const {topic, latitude, longitude } = body;
+  const {image, imageName} = body;
+  const {carriageId} = body
+  console.log(message)
+  if (latitude && longitude){
+    message.latitude = latitude
+    message.longitude = longitude
   }
-  
+  if (!message.prediction.some((carriage) => carriage.carriageId === carriageId)){
+    try {
+      imageCount = await imageProcess.countImage(image, imageName)
+      const {head, person} = imageCount
+      const predictionResult = {
+        "carriageId": carriageId,
+        "person": person,
+        "crowd_level": 5
+      }
+      message.prediction.push(predictionResult)
+      if (message.prediction.length == 3){
+        mqtt.publishMessage(topic, JSON.stringify(message))
+        message.prediction = []
+      }
+      return {
+        message: "Carriage " + carriageId + " is succesffuly predicted"
+      };
+    } catch (error) {
+      return error
+    }
+  }
+ 
+  else {
+    return {
+      message: "Carriarge " + carriageId + " is already predicted"
+    }
+  }
 }
 
 module.exports = {
