@@ -57,8 +57,13 @@ async function login(body) {
 }
 
 async function insertTrainData(body) {
-  const {latitude, longitude, person, crowd_level} = body
-  const query = `INSERT INTO TRAINDATA (trainId, carriageId, latitude, longitude, person, crowdLevel) VALUES (1, 1, ${latitude}, ${longitude}, ${person}, ${crowd_level})`;
+  const {latitude, longitude, prediction} = body
+  let person = []
+  for (let i = 0; i< prediction.length; i++){
+    person[i] = prediction.find(carriage => carriage.carriageId == i+1).person
+  }
+  const query = `INSERT INTO TRAINDATA (trainId, latitude, longitude, carriage1, carriage2, carriage3) VALUES (1, ${latitude}, ${longitude}, ${person[0]}, ${person[1]}, ${person[2]})`;
+  person = []
   const result = await db.query(query);
   if (result.rows.length === 0) {
     return {
@@ -102,7 +107,6 @@ async function publish(body) {
   const {topic, latitude, longitude } = body;
   const {image, imageName} = body;
   const {carriageId} = body
-  console.log(message)
   if (latitude && longitude){
     message.latitude = latitude
     message.longitude = longitude
@@ -119,6 +123,7 @@ async function publish(body) {
       message.prediction.push(predictionResult)
       if (message.prediction.length == 3){
         mqtt.publishMessage(topic, JSON.stringify(message))
+        insertTrainData(message)
         message.prediction = []
       }
       return {
