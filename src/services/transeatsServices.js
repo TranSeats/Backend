@@ -114,11 +114,11 @@ async function publish(body) {
   if (!message.prediction.some((carriage) => carriage.carriageId === carriageId)){
     try {
       imageCount = await imageProcess.countImage(image, imageName)
-      const {head, person} = imageCount
+      const {person, crowd_level} = imageCount
       const predictionResult = {
         "carriageId": carriageId,
         "person": person,
-        "crowd_level": 5
+        "crowd_level": crowd_level
       }
       message.prediction.push(predictionResult)
       if (message.prediction.length == 3){
@@ -127,7 +127,7 @@ async function publish(body) {
         message.prediction = []
       }
       return {
-        message: "Carriage " + carriageId + " is succesffuly predicted"
+        message: "Carriage " + carriageId + " is successfully predicted"
       };
     } catch (error) {
       return error
